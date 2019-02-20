@@ -1,6 +1,6 @@
 import numpy as np
 from .initializer import initialize_weight
-from .activation import relu, sigmoid, sigmoid_prime, softmax
+from .activation import relu, sigmoid, sigmoid_prime, softmax, tanh, tanh_prime, leaky_relu, elu
 
 # Useful object for stacking of layers
 class Sequential(object):
@@ -23,7 +23,6 @@ class Sequential(object):
                 self.back_var = layer.backward(label)
             else:
                 self.back_var = layer.backward(self.back_var)
-
 
 # Fully-connected Layer
 class Linear(object):
@@ -52,13 +51,22 @@ class Linear(object):
         self.db = (1/m) * np.sum(dh, axis=0, keepdims=True)
         return np.dot(dh, self.w.T)
 
+
+
 # Activation Functions
 class ReLU(object):
     def __init__(self):
         self.layer_type = "activation.ReLU"
+        self.relu_prime = None
 
     def forward(self, x):
-        return relu(x)
+        out = relu(x)
+        self.relu_prime = out
+        return out
+
+    def backward(self, da):
+        self.relu_prime[self.relu_prime > 0] = 1
+        return da * self.relu_prime
 
 class Sigmoid(object):
     def __init__(self):
@@ -83,3 +91,53 @@ class Softmax(object):
 
     def backward(self, y):
         return self.softmax_out - y
+
+class Tanh(object):
+    def __init__(self):
+        self.layer_type = "activation.Tanh"
+        self.tanh_out = None
+
+    def forward(self, x):
+        self.tanh_out = tanh(x)
+        return self.tanh_out
+
+    def backward(self, da):
+        return da * tanh_prime(self.tanh_out)
+    
+class LeakyReLU(object):
+    def __init__(self):
+        self.layer_type = "activation.LeakyReLU"
+        self.neg_indices = None
+        self.pos_indices = None
+        self.leaky_relu_prime = None
+
+    def forward(self, x):
+        self.neg_indices = x < 0
+        self.pos_indices = x > 0
+        self.leaky_relu_prime = x
+        return leaky_relu(x)
+
+    def backward(self, da):
+        self.leaky_relu_prime[self.pos_indices] = 1
+        self.leaky_relu_prime[self.neg_indices] = 0.01
+        return da * self.leaky_relu_prime
+
+class ELU(object):
+    def __init__(self, alpha=1.0):
+        self.layer_type = "activation.ELU"
+        self.alpha = np.float32(alpha)
+        self.neg_indices = None
+        self.pos_indices = None
+        self.elu_prime = None
+
+    def forward(self, x):
+        self.neg_indices = x < 0
+        self.pos_indices = x > 0
+        out = elu(x)
+        self.elu_prime = out
+        return out
+
+    def backward(self, da):
+        self.elu_prime[self.pos_indices] = 1
+        self.elu_prime[self.neg_indices] += self.alpha
+        return da * self.elu_prime 
