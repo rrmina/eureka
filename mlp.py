@@ -1,8 +1,7 @@
-
 import numpy as np
 from eureka.activation import relu, sigmoid, sigmoid_prime, softmax
 from eureka.utils import one_hot_encoder, dataloader
-from eureka.losses import cross_entropy_loss
+import eureka.losses as losses
 import eureka.optim as optim
 import eureka.nn as nn
 import datasets.mnist
@@ -22,13 +21,16 @@ def main():
     # Define model's architecture
     model = nn.Sequential([
         nn.Linear(784, 256),
-        nn.Sigmoid(),
+        nn.ReLU(),
         nn.Linear(256, 10),
         nn.Softmax()
     ])
 
     # Define the optimizer
     optimizer = optim.Adam(model, lr=0.0002)
+
+    # Define the criterion/loss function
+    criterion = losses.CrossEntropyLoss()
 
     num_epochs = 20
     for epoch in range(1, num_epochs+1):
@@ -48,10 +50,13 @@ def main():
             acc += np.sum(pred == labels.argmax(axis=1).reshape(m,1))
             
             # Compute loss
-            batch_loss += cross_entropy_loss(out, labels.argmax(axis=1).reshape(m,1))
+            batch_loss += criterion(out, labels)
 
-            # Backward Propagation
-            model.backward(labels)
+            # Backward Propagation within Loss Function
+            back_var = criterion.backward()
+
+            # Backward Propagation within the Model
+            model.backward(back_var)
 
             # Optimization Step
             optimizer.step()
