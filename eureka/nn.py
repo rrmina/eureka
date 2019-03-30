@@ -16,13 +16,10 @@ class Sequential(object):
         self.out = x
         return self.out
 
-    def backward(self, label):
+    def backward(self, initial_back_var):
+        self.back_var = initial_back_var
         for layer in reversed(self.layers):
-            # Assuming Softmax and Cross-entropy loss
-            if (layer.layer_type == "activation.Softmax"):
-                self.back_var = layer.backward(label)
-            else:
-                self.back_var = layer.backward(self.back_var)
+            self.back_var = layer.backward(self.back_var)
 
 # Fully-connected Layer
 class Linear(object):

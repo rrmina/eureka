@@ -94,4 +94,4 @@ def read_image_file(path):
         n_cols = get_int(data[12:16])
         parsed = np.frombuffer(data, dtype=np.uint8, offset=16)
     
-    return parsed.reshape(length, n_rows, n_cols)
+    return parsed.reshape(length, n_rows, n_cols) / 255
