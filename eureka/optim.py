@@ -13,7 +13,7 @@ class SGD(object):
                 layer.w -= self.lr * layer.dw
                 layer.b -= self.lr * layer.db
 
-class Moment(object):
+class Momentum(object):
     def __init__(self, model_instance, lr=0.01, beta_1=0.9):
         self.model_instance = model_instance
         self.lr = lr
