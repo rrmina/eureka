@@ -9,10 +9,16 @@ class Sequential(object):
         self.layers = layers
         self.out = None
         self.back_var = None
+        self.train_mode = True
 
     def forward(self, x):
         for layer in self.layers:
-            x = layer.forward(x)
+            # Conditional: If test mode, bypass Dropout and Norm layers
+            if (self.train_mode):
+                x = layer.forward(x)
+            else:
+                if (layer.layer_type != "nn.Dropout"):
+                    x = layer.forward(x)
         self.out = x
         return self.out
 
@@ -20,6 +26,12 @@ class Sequential(object):
         self.back_var = initial_back_var
         for layer in reversed(self.layers):
             self.back_var = layer.backward(self.back_var)
+
+    def train(self):
+        self.train_mode = True
+    
+    def test(self):
+        self.train_mode = False
 
 # Fully-connected Layer
 class Linear(object):
@@ -48,7 +60,28 @@ class Linear(object):
         self.db = (1/m) * np.sum(dh, axis=0, keepdims=True)
         return np.dot(dh, self.w.T)
 
+# Dropout Layer
+class Dropout(object):
+    def __init__(self, drop_prob):
+        # Initialize layer type
+        self.layer_type = "nn.Dropout"
 
+        # Initialize parameters
+        self.drop_prob = drop_prob
+        self.keep_prob = 1 - drop_prob
+
+        # Initialize mask
+        self.mask = None
+
+    def forward(self, x):
+        # Generate mask
+        self.mask = np.random.binomial(1, self.keep_prob, size=x.shape)
+
+        # Apply mask
+        return x * self.mask
+
+    def backward(self, da):
+        return da * self.mask
 
 # Activation Functions
 class ReLU(object):

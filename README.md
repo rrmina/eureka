@@ -26,10 +26,11 @@ import eureka.nn as nn
 import eureka.optim as optim
 import eureka.losses as losses
 
-# MNIST Dense network with 1-hidden layer of 256 neurons
+# MNIST Dense network with 1-hidden layer of 256 neurons and a Dropout of 0.5
 model = nn.Sequential([
     nn.Linear(784, 256),
     nn.ReLU(),
+    nn.Dropout(0.5),
     nn.Linear(256, 10),
     nn.Softmax()
 ])
@@ -81,10 +82,12 @@ trainloader = dataloader(x, y, batch_size=64, shuffle=True)
 model = nn.Sequential([
     nn.Linear(784, 256),
     nn.ReLU(),
+    nn.Dropout(0.5),
     nn.Linear(256, 10),
     nn.Softmax()
 ])
 optimizer = optim.Adam(model, lr=0.0002)
+criterion = losses.CrossEntropyLoss()
 
 # Train loop
 num_epochs = 20
@@ -98,6 +101,10 @@ for epoch in range(1, num_epochs+1):
         m = inputs.shape[0]
         batch_loss += criterion(out, labels)
 
+        # Compute Accuracy
+        pred = np.argmax(out, axis=1).reshape(-1, 1)
+        acc += np.sum(pred == labels.argmax(axis=1).reshape(-1,1))
+        
         # Compute Loss and Model Gradients
         back_var = criterion.backward()
         model.backward(labels)
@@ -105,6 +112,7 @@ for epoch in range(1, num_epochs+1):
         # Backward Prop using Optimizer step
         optimizer.step()
     
-    # Print Loss
-    print("Loss: {:.6f}".format(batch_loss/num_samples))   
+    # Print Loss and Accuracy
+    print("Loss: {:.6f}".format(batch_loss/num_samples)) 
+    print("Accuracy: {:.2f}%\n".format(acc/num_samples*100)) 
 ```

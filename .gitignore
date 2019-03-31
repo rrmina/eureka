@@ -1,5 +1,5 @@
-data
+*.py linguist-language=python
+*.ipynb linguist-documentation
 __pycache__
-datasets/__pycache__
-eureka/__pycache__
-.ipynb_checkpoints
+/__pycache__
+*/__pycache__
