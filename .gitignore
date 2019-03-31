@@ -1,5 +1,8 @@
-*.py linguist-language=python
-*.ipynb linguist-documentation
-__pycache__
-/__pycache__
-*/__pycache__
+*.pyc
+*.pyo
+build/
+dist/
+__pycache__/
+.ipynb_checkpoints/
+data/
+debug.log
