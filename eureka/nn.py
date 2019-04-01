@@ -124,7 +124,7 @@ class BatchNorm1d(BaseLayer):
 
         # For the most part of BatchNorm, you don't actually need to implement these gradient variables
         if (self.affine):
-            self.dw = np.zeros((1, num_features)), np.zeros((1, num_features))
+            self.dw, self.db = None, None
             self.vw, self.vb = np.zeros((1, num_features)), np.zeros((1, num_features))
             self.sw, self.sb = np.zeros((1, num_features)), np.zeros((1, num_features))
 
@@ -149,8 +149,8 @@ class BatchNorm1d(BaseLayer):
     def backward(self, d_bn_out):
         # Gradient with respect to affine parameters
         if (self.affine):
-            self.dbeta = np.sum(d_bn_out, axis=0)
-            self.dgamma = np.sum(d_bn_out*self.x_hat, axis=0)
+            self.dw = np.sum(d_bn_out*self.x_hat, axis=0)
+            self.db = np.sum(d_bn_out, axis=0)
 
         # Gradient of loss with respect to BN-layer input x
         dx_hat = d_bn_out * self.w
