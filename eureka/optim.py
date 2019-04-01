@@ -8,7 +8,7 @@ class SGD(object):
 
     def step(self):
         for layer in self.model_instance.layers:
-            if (layer.layer_type == "nn.Linear"):
+            if (layer.affine):
                 # Weight Update
                 layer.w -= self.lr * layer.dw
                 layer.b -= self.lr * layer.db
@@ -21,7 +21,7 @@ class Momentum(object):
 
     def step(self):
         for layer in self.model_instance.layers:
-            if (layer.layer_type == "nn.Linear"):
+            if (layer.affine):
                 # Compute 1st moment
                 layer.vw = self.beta_1 * layer.vw + (1-self.beta_1) * layer.dw
                 layer.vb = self.beta_1 * layer.vb + (1-self.beta_1) * layer.db
@@ -39,7 +39,7 @@ class RMSProp(object):
 
     def step(self):
         for layer in self.model_instance.layers:
-            if (layer.layer_type == "nn.Linear"):
+            if (layer.affine):
                 # Compute 2nd moment
                 layer.sw = self.beta_2 * layer.sw + (1-self.beta_2) * layer.dw * layer.dw
                 layer.sb = self.beta_2 * layer.sb + (1-self.beta_2) * layer.db * layer.db
@@ -58,7 +58,7 @@ class Adam(object):
 
     def step(self):
         for layer in self.model_instance.layers:
-            if (layer.layer_type == "nn.Linear"):
+            if (layer.affine):
                 # Compute 1st moment
                 layer.vw = self.beta_1 * layer.vw + (1-self.beta_1) * layer.dw
                 layer.vb = self.beta_1 * layer.vb + (1-self.beta_1) * layer.db
@@ -81,8 +81,8 @@ class Adam_accident(object):
 
     def step(self):
         for layer in self.model_instance.layers:
-            if (layer.layer_type == "nn.Linear"):
-
+            if (layer.affine):
+                
                 # Compute 1st moment
                 # This is a wrong mistake! See what I did there? negative * negative = positive?
                 # It turns out that this 1st moment computation produces empirically good results WOW Eureka!
