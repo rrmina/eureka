@@ -1,6 +1,6 @@
 # Eureka : A simple Neural Network Framework written in Numpy :zap: :bulb: :high_brightness:
 
-### Clean Interface
+### Clean Interface!!!
 
 #### Loading Datasets in-house
 
@@ -26,11 +26,14 @@ import eureka.nn as nn
 import eureka.optim as optim
 import eureka.losses as losses
 
-# MNIST Dense network with 1-hidden layer of 256 neurons and a Dropout of 0.5
+# MNIST Dense network with 1-hidden layer of 256 neurons,
+# a BatchNorm after activation with learnable parameters,
+# and a Dropout layer with 0.5 probability of dropping neurons
 model = nn.Sequential([
     nn.Linear(784, 256),
     nn.ReLU(),
-    nn.Dropout(0.5),
+    nn.BatchNorm1d(256, affine=True),
+    nn.Dropout(0.2),
     nn.Linear(256, 10),
     nn.Softmax()
 ])
@@ -78,11 +81,12 @@ num_samples = x.shape[0]
 # Prepare the dataloader
 trainloader = dataloader(x, y, batch_size=64, shuffle=True)
 
-# Define model architecture and Optimizer
+# Define model architecture, Optimizer, and Criterion/Loss Function
 model = nn.Sequential([
     nn.Linear(784, 256),
     nn.ReLU(),
-    nn.Dropout(0.5),
+    nn.BatchNorm1d(256, affine=False),
+    nn.Dropout(0.2),
     nn.Linear(256, 10),
     nn.Softmax()
 ])
@@ -106,8 +110,8 @@ for epoch in range(1, num_epochs+1):
         acc += np.sum(pred == labels.argmax(axis=1).reshape(-1,1))
         
         # Compute Loss and Model Gradients
-        back_var = criterion.backward()
-        model.backward(labels)
+        dloss_over_dout = criterion.backward()
+        model.backward(dloss_over_dout)
 
         # Backward Prop using Optimizer step
         optimizer.step()
