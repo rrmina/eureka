@@ -72,7 +72,7 @@ class Linear(BaseLayer):
 
 # Dropout Layer
 class Dropout(BaseLayer):
-    def __init__(self, drop_prob):
+    def __init__(self, drop_prob, inverted = True):
         super(Dropout, self).__init__()
         # Initialize layer type
         self.layer_type = "nn.Dropout"
@@ -84,15 +84,24 @@ class Dropout(BaseLayer):
         # Initialize mask
         self.mask = None
 
+        # Inverted 
+        self.inverted = inverted
+
     def forward(self, x):
         # Generate mask
         self.mask = np.random.binomial(1, self.keep_prob, size=x.shape)
 
         # Apply mask
-        return x * self.mask
+        if (self.inverted):
+            return x * self.mask / self.keep_prob
+        else:
+            return x * self.mask
 
     def backward(self, da):
-        return da * self.mask
+        if (self.inverted):
+            return da * self.mask / self.keep_prob
+        else:
+            return da * self.mask
 
 # Normalization Layers
 class BatchNorm1d(BaseLayer):
